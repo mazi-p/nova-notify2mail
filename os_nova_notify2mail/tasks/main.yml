@@ -1,0 +1,95 @@
+---
+- name: Ensure Python and pip are installed
+  apt:
+    name:
+      - python3
+      - python3-pip
+    state: present
+    update_cache: yes
+
+- name: Create application directory
+  file:
+    path: /opt/nova-notify2mail
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy nova_notify2mail.py script
+  copy:
+    src: nova_notify2mail.py
+    dest: /opt/nova-notify2mail/nova_notify2mail.py
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy requirements.txt
+  copy:
+    src: requirements.txt
+    dest: /opt/nova-notify2mail/requirements.txt
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install Python dependencies from requirements.txt
+  pip:
+    requirements: /opt/nova-notify2mail/requirements.txt
+    executable: pip3
+
+- name: Copy systemd service file
+  copy:
+    src: nova-notify2mail.service
+    dest: /etc/systemd/system/nova-notify2mail.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create log file
+  file:
+    path: "{{ nova_notify2mail_log_file }}"
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create systemd drop-in directory for environment variables
+  file:
+    path: /etc/systemd/system/nova-notify2mail.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Configure environment variables
+  copy:
+    dest: /etc/systemd/system/nova-notify2mail.service.d/env.conf
+    content: |
+      [Service]
+      Environment="NOVA_NOTIFY2MAIL_RABBITMQ_HOST={{ nova_notify2mail_rabbitmq_host }}"
+      Environment="NOVA_NOTIFY2MAIL_RABBITMQ_PORT={{ nova_notify2mail_rabbitmq_port }}"
+      Environment="NOVA_NOTIFY2MAIL_RABBITMQ_USER={{ nova_notify2mail_rabbitmq_user }}"
+      Environment="NOVA_NOTIFY2MAIL_RABBITMQ_PASS={{ nova_notify2mail_rabbitmq_pass }}"
+      Environment="NOVA_NOTIFY2MAIL_RABBITMQ_VHOST={{ nova_notify2mail_rabbitmq_vhost }}"
+      Environment="NOVA_NOTIFY2MAIL_QUEUE_NAME={{ nova_notify2mail_queue_name }}"
+      Environment="NOVA_NOTIFY2MAIL_SMTP_SERVER={{ nova_notify2mail_smtp_server }}"
+      Environment="NOVA_NOTIFY2MAIL_SMTP_PORT={{ nova_notify2mail_smtp_port }}"
+      Environment="NOVA_NOTIFY2MAIL_SMTP_FROM={{ nova_notify2mail_smtp_from }}"
+      Environment="NOVA_NOTIFY2MAIL_DEFAULT_ADMIN={{ nova_notify2mail_default_admin }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_AUTH_URL={{ nova_notify2mail_os_auth_url }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_USERNAME={{ nova_notify2mail_os_username }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_PASSWORD={{ nova_notify2mail_os_password }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_PROJECT_NAME={{ nova_notify2mail_os_project_name }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_USER_DOMAIN_NAME={{ nova_notify2mail_os_user_domain_name }}"
+      Environment="NOVA_NOTIFY2MAIL_OS_PROJECT_DOMAIN_NAME={{ nova_notify2mail_os_project_domain_name }}"
+      Environment="NOVA_NOTIFY2MAIL_LOG_FILE={{ nova_notify2mail_log_file }}"
+      Environment="NOVA_NOTIFY2MAIL_LOG_LEVEL={{ nova_notify2mail_log_level }}"
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start nova-notify2mail service
+  systemd:
+    name: nova-notify2mail
+    enabled: yes
+    state: started

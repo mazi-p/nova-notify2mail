@@ -1,0 +1,17 @@
+[Unit]
+Description=OpenStack Nova VM Creation Notification to Email (nova-notify2mail)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/nova-notify2mail
+ExecStart=/usr/bin/python3 /opt/nova-notify2mail/nova_notify2mail.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/nova_notify2mail.log
+StandardError=append:/var/log/nova_notify2mail.log
+
+[Install]
+WantedBy=multi-user.target
