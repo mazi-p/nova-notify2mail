@@ -1,8 +1,9 @@
 ---
 - name: Deploy nova-notify2mail service into LXC container
   hosts: nova_notify2mail_container
-  become: yes
-  gather_facts: yes
-
+  become: true
+  gather_facts: true
+  vars_files:
+    - /etc/openstack_deploy/user_nova_notify2mail_vars.yml
   roles:
     - os_nova_notify2mail

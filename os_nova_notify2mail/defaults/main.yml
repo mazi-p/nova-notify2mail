@@ -1,22 +1,26 @@
 ---
-nova_notify2mail_rabbitmq_host: "controller.example.com"
-nova_notify2mail_rabbitmq_port: 5672
-nova_notify2mail_rabbitmq_user: "openstack"
-nova_notify2mail_rabbitmq_pass: "RABBIT_PASS"
-nova_notify2mail_rabbitmq_vhost: "/"
+# RabbitMQ connection (reuse OSA vars where possible)
+nova_notify2mail_rabbitmq_host: "{{ rabbitmq_host | default('controller') }}"
+nova_notify2mail_rabbitmq_port: "{{ rabbitmq_port | default(5672) }}"
+nova_notify2mail_rabbitmq_user: "{{ rabbitmq_userid | default('openstack') }}"
+nova_notify2mail_rabbitmq_pass: "{{ rabbitmq_password | default('CHANGEME') }}"
+nova_notify2mail_rabbitmq_vhost: "/nova_notify2mail"
 nova_notify2mail_queue_name: "nova_notifications"
 
-nova_notify2mail_smtp_server: "smtp.example.com"
-nova_notify2mail_smtp_port: 25
-nova_notify2mail_smtp_from: "openstack-alerts@example.com"
-nova_notify2mail_default_admin: "cloud-admin@example.com"
+# SMTP settings (these may not exist in OSA, so keep defaults or override in user vars)
+nova_notify2mail_smtp_server: "{{ smtp_host | default('smtp.example.com') }}"
+nova_notify2mail_smtp_port: "{{ smtp_port | default(25) }}"
+nova_notify2mail_smtp_from: "{{ smtp_from_address | default('openstack-alerts@example.com') }}"
+nova_notify2mail_default_admin: "{{ cloud_admin_email | default('cloud-admin@example.com') }}"
 
-nova_notify2mail_os_auth_url: "http://controller:5000/v3"
-nova_notify2mail_os_username: "admin"
-nova_notify2mail_os_password: "ADMIN_PASS"
-nova_notify2mail_os_project_name: "admin"
-nova_notify2mail_os_user_domain_name: "Default"
-nova_notify2mail_os_project_domain_name: "Default"
+# Keystone admin credentials (reuse OSA vars)
+nova_notify2mail_os_auth_url: "{{ keystone_service_adminuri | default('http://controller:5000/v3') }}"
+nova_notify2mail_os_username: "{{ keystone_admin_user_name | default('admin') }}"
+nova_notify2mail_os_password: "{{ keystone_auth_admin_password | default('CHANGEME') }}"
+nova_notify2mail_os_project_name: "{{ keystone_admin_tenant_name | default('admin') }}"
+nova_notify2mail_os_user_domain_name: "{{ keystone_admin_user_domain | default('Default') }}"
+nova_notify2mail_os_project_domain_name: "{{ keystone_admin_project_domain | default('Default') }}"
 
+# Logging
 nova_notify2mail_log_file: "/var/log/nova_notify2mail.log"
 nova_notify2mail_log_level: "INFO"

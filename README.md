@@ -64,28 +64,58 @@ Defaults are in `os_nova_notify2mail/defaults/main.yml`.
 ## 📦 Deployment
 
 ### Option 1 — Manual inside LXC
-```bash
+```# 1. Install Python and pip
 apt update && apt install python3-pip -y
+
+# 2. Create application directory
+mkdir -p /opt/nova-notify2mail
+
+# 3. Copy your script and requirements
+cp nova_notify2mail.py /opt/nova-notify2mail/
+cp requirements.txt /opt/nova-notify2mail/
+
+# 4. Install Python dependencies
 pip3 install -r /opt/nova-notify2mail/requirements.txt
 
-# Copy script and service
-cp os_nova_notify2mail/files/nova_notify2mail.py /opt/nova-notify2mail/
-cp os_nova_notify2mail/files/nova-notify2mail.service /etc/systemd/system/
+# 5. Copy systemd service file
+cp nova-notify2mail.service /etc/systemd/system/
 
-# Create log file
+# 6. Create log file
 touch /var/log/nova_notify2mail.log
 chown root:root /var/log/nova_notify2mail.log
 
-# Set environment variables in a systemd drop-in
+# 7. Create systemd drop-in for ALL environment variables
 mkdir -p /etc/systemd/system/nova-notify2mail.service.d
-cat <<EOF > /etc/systemd/system/nova-notify2mail.service.d/env.conf
+cat <<'EOF' > /etc/systemd/system/nova-notify2mail.service.d/env.conf
 [Service]
 Environment="NOVA_NOTIFY2MAIL_RABBITMQ_HOST=controller.example.com"
+Environment="NOVA_NOTIFY2MAIL_RABBITMQ_PORT=5672"
 Environment="NOVA_NOTIFY2MAIL_RABBITMQ_USER=openstack"
 Environment="NOVA_NOTIFY2MAIL_RABBITMQ_PASS=RABBIT_PASS"
+Environment="NOVA_NOTIFY2MAIL_RABBITMQ_VHOST=/nova_notify2mail"
+Environment="NOVA_NOTIFY2MAIL_QUEUE_NAME=nova_notifications"
+
 Environment="NOVA_NOTIFY2MAIL_SMTP_SERVER=smtp.example.com"
+Environment="NOVA_NOTIFY2MAIL_SMTP_PORT=25"
+Environment="NOVA_NOTIFY2MAIL_SMTP_FROM=openstack-alerts@example.com"
+Environment="NOVA_NOTIFY2MAIL_DEFAULT_ADMIN=cloud-admin@example.com"
+Environment="NOVA_NOTIFY2MAIL_SMTP_RETRIES=3"
+Environment="NOVA_NOTIFY2MAIL_SMTP_RETRY_DELAY=5"
+
+Environment="NOVA_NOTIFY2MAIL_OS_AUTH_URL=http://controller:5000/v3"
+Environment="NOVA_NOTIFY2MAIL_OS_USERNAME=admin"
+Environment="NOVA_NOTIFY2MAIL_OS_PASSWORD=ADMIN_PASS"
+Environment="NOVA_NOTIFY2MAIL_OS_PROJECT_NAME=admin"
+Environment="NOVA_NOTIFY2MAIL_OS_USER_DOMAIN_NAME=Default"
+Environment="NOVA_NOTIFY2MAIL_OS_PROJECT_DOMAIN_NAME=Default"
+Environment="NOVA_NOTIFY2MAIL_KEYSTONE_RETRIES=3"
+Environment="NOVA_NOTIFY2MAIL_KEYSTONE_RETRY_DELAY=5"
+
+Environment="NOVA_NOTIFY2MAIL_LOG_FILE=/var/log/nova_notify2mail.log"
+Environment="NOVA_NOTIFY2MAIL_LOG_LEVEL=INFO"
 EOF
 
+# 8. Reload systemd and start service
 systemctl daemon-reload
 systemctl enable --now nova-notify2mail
 ```
