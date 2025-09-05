@@ -1,0 +1,6 @@
+---
+- hosts: nova_notify2mail_all
+  gather_facts: yes
+  roles:
+    - nova-notify2mail
+

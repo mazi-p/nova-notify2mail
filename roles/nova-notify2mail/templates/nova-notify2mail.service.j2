@@ -1,0 +1,15 @@
+[Unit]
+Description=Nova Notify to Mail Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/nova-notify2mail/nova_notify2mail.py
+Restart=on-failure
+User=root
+WorkingDirectory=/opt/nova-notify2mail
+EnvironmentFile=-/etc/systemd/system/nova-notify2mail.service.d/env.conf
+
+[Install]
+WantedBy=multi-user.target
+

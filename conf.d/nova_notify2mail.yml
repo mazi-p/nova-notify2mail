@@ -1,5 +1,0 @@
-nova_notify2mail_container:
-  container_name: nova_notify2mail_container
-  container_type: utility
-  properties:
-    service_name: nova_notify2mail

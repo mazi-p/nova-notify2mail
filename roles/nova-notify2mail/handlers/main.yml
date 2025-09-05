@@ -1,0 +1,7 @@
+---
+- name: restart nova-notify2mail
+  systemd:
+    name: nova-notify2mail
+    state: restarted
+    daemon_reload: yes
+

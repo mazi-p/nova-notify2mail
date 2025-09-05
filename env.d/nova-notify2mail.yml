@@ -1,0 +1,20 @@
+component_skel:
+  nova-notify2mail:
+    belongs_to:
+      - nova_notify2mail_all
+
+container_skel:
+  nova-notify2mail_container:
+    belongs_to:
+      - operator_containers
+    contains:
+      - nova-notify2mail
+
+physical_skel:
+  operator_containers:
+    belongs_to:
+      - all_containers
+  operator_hosts:
+    belongs_to:
+      - hosts
+
